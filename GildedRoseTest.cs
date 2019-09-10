@@ -101,33 +101,6 @@ namespace csharp
         }
 
         [Test]
-        public void BackStagePassAny_IncreasesQualityByThree_IfSellInDateFiveOrLess()
-        {
-            IList<Item> Items = new List<Item>
-            {
-                new Item { Name = "Backstage passes to a nice concert", SellIn = 5, Quality = 10 },
-            };
-
-            GildedRose app = new GildedRose(Items);
-            app.UpdateQuality();
-            Assert.AreEqual(13, Items[0].Quality);
-        }
-
-        [Test]
-        public void BackStagePassAny_DegradesToZero_IfSellInDateLessThanZero()
-        {
-            IList<Item> Items = new List<Item>
-            {
-                new Item { Name = "Backstage passes to a REALLY nice concert", SellIn = 0, Quality = 10 },
-            };
-
-            GildedRose app = new GildedRose(Items);
-            app.UpdateQuality();
-            Assert.AreEqual(0, Items[0].Quality);
-        }
-
-
-        [Test]
         public void SpecialLegendaryItem_NeverDecreasesInQuality()
         {
             IList<Item> Items = new List<Item>
