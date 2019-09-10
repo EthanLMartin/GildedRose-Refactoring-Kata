@@ -17,60 +17,72 @@ namespace csharp
         {
             for (var i = 0; i < Items.Count; i++)
             {
-                int qualityChange = 0;
+                Items[i] = UpdateItemQuality(Items[i]);
+            }
+        }
 
-                if (IsLegendary(Items[i]))
+        private Item UpdateItemQuality(Item item)
+        {
+            int qualityChange = 0;
+
+            if (IsLegendary(item))
+            {
+                return item;
+            }
+
+            if (IsBackStagePass(item))
+            {
+                if (IsInDate(item))
                 {
-                    continue;
+                    qualityChange = GetBackstagePassQualityChange(item);
                 }
-
-                if (IsBackStagePass(Items[i]))
-                {
-                    int sellIn = Items[i].SellIn;
-
-                    if (sellIn > 10)
-                    {
-                        qualityChange = 1;
-                    }
-                    else if (sellIn > 5)
-                    {
-                        qualityChange = 2;
-                    }
-                    else if (sellIn > 0)
-                    {
-                        qualityChange = 3;
-                    }
-                    else
-                    {
-                        Items[i].Quality = 0;
-                        Items[i].SellIn--;
-                        continue;
-                    }
-                }
-
-                else if (IsBrie(Items[i]))
-                {
-                    qualityChange = 1;
-                }
-
                 else
                 {
-                    qualityChange = -1;
+                    item.Quality = 0;
+                    item.SellIn--;
+                    return item;
                 }
+            }
+            else if (IsBrie(item))
+            {
+                qualityChange = 1;
+            }
+            else
+            {
+                qualityChange = -1;
+            }
 
+            if (IsConjured(item))
+            {
+                qualityChange *= 2;
+            }
 
-                if (IsConjured(Items[i]))
-                {
-                    qualityChange *= 2;
-                }
+            if (!IsInDate(item))
+            {
+                qualityChange *= 2;
+            }
 
-                if (!IsInDate(Items[i]))
-                {
-                    qualityChange *= 2;
-                }
+            item.SellIn--;
+            item = ChangeBoundedQuality(item, qualityChange);
 
-                Items[i].SellIn--;
-                Items[i] = ChangeBoundedQuality(Items[i], qualityChange);
+            return item;
+        }
+
+        private int GetBackstagePassQualityChange(Item item)
+        {
+            int sellIn = item.SellIn;
+
+            if (sellIn > 10)
+            {
+                return 1;
+            }
+            else if (sellIn > 5)
+            {
+                return 2;
+            }
+            else
+            {
+                return 3;
             }
         }
 
