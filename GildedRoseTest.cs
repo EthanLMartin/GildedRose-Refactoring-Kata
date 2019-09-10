@@ -7,12 +7,30 @@ namespace csharp
     public class GildedRoseTest
     {
         [Test]
-        public void foo()
+        public void Item_NeverChangesName_OnUpdateQuality()
         {
             IList<Item> Items = new List<Item> { new Item { Name = "foo", SellIn = 0, Quality = 0 } };
             GildedRose app = new GildedRose(Items);
             app.UpdateQuality();
             Assert.AreEqual("foo", Items[0].Name);
+        }
+
+        [Test]
+        public void NonLegendaryItems_HaveSellInReducedByOne()
+        {
+            IList<Item> Items = new List<Item>
+            {
+                new Item { Name = "One Regular Item", SellIn = 20, Quality = 0 },
+                new Item { Name = "Regular Item Two", SellIn = -2, Quality = 0 },
+                new Item { Name = "Aged Brie", SellIn = 0, Quality = 0 },
+                new Item { Name = "Conjured Mana Cake", SellIn = -419, Quality = 0 },
+            };
+            GildedRose app = new GildedRose(Items);
+            app.UpdateQuality();
+            Assert.AreEqual( 19, Items[0].SellIn);
+            Assert.AreEqual(-3, Items[1].SellIn);
+            Assert.AreEqual(-1, Items[2].SellIn);
+            Assert.AreEqual(-420, Items[3].SellIn);
         }
 
         [Test]
@@ -43,7 +61,7 @@ namespace csharp
         }
 
         [Test]
-        public void SpecialNonLgendaryItems_NeverUpdatesQuality_ToAboveFifty()
+        public void SpecialNonLegendaryItems_NeverUpdatesQuality_ToAboveFifty()
         {
             IList<Item> Items = new List<Item>
             {
@@ -110,7 +128,7 @@ namespace csharp
         }
 
         [Test]
-        public void SpecialLegendaryItem_NeverDecreasesInQuality()
+        public void LegendaryItem_NeverChangesQuality()
         {
             IList<Item> Items = new List<Item>
             {
@@ -122,6 +140,21 @@ namespace csharp
             app.UpdateQuality();
             Assert.AreEqual(80, Items[0].Quality);
             Assert.AreEqual(80, Items[1].Quality);
+        }
+
+        [Test]
+        public void LegendaryItem_NeverChangesSellIn()
+        {
+            IList<Item> Items = new List<Item>
+            {
+                new Item { Name = "Sulfuras, Hand of Ragnaros", SellIn = -1, Quality = 80 },
+                new Item { Name = "Sulfuras, Hand of Ragnaros", SellIn = 2, Quality = 80 },
+            };
+
+            GildedRose app = new GildedRose(Items);
+            app.UpdateQuality();
+            Assert.AreEqual(-1, Items[0].SellIn);
+            Assert.AreEqual(2, Items[1].SellIn);
         }
 
         [Test]

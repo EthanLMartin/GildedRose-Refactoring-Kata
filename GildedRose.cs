@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using NUnit.Framework.Constraints;
 
 namespace csharp
 {
@@ -45,15 +48,16 @@ namespace csharp
                     }
                 }
 
-                if (IsBrie(Items[i]))
+                else if (IsBrie(Items[i]))
                 {
                     qualityChange = 1;
                 }
 
-                if (IsNonSpecialItem(Items[i]))
+                else
                 {
                     qualityChange = -1;
                 }
+
 
                 if (IsConjured(Items[i]))
                 {
@@ -68,13 +72,6 @@ namespace csharp
                 Items[i].SellIn--;
                 Items[i] = ChangeBoundedQuality(Items[i], qualityChange);
             }
-        }
-
-        private bool IsNonSpecialItem(Item item)
-        {
-            return !IsLegendary(item) &&
-                   !IsBackStagePass(item) &&
-                   !IsBrie(item);
         }
 
         private bool IsLegendary(Item item)
