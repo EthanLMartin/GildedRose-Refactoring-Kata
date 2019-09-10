@@ -14,7 +14,7 @@ namespace csharp
         {
             for (var i = 0; i < Items.Count; i++)
             {
-                int qualityIncrease = 0;
+                int qualityChange = 0;
 
                 if (IsLegendary(Items[i]))
                 {
@@ -27,15 +27,15 @@ namespace csharp
 
                     if (sellIn > 10)
                     {
-                        qualityIncrease = 1;
+                        qualityChange = 1;
                     }
                     else if (sellIn > 5)
                     {
-                        qualityIncrease = 2;
+                        qualityChange = 2;
                     }
                     else if (sellIn > 0)
                     {
-                        qualityIncrease = 3;
+                        qualityChange = 3;
                     }
                     else
                     {
@@ -47,35 +47,26 @@ namespace csharp
 
                 if (IsBrie(Items[i]))
                 {
-                    qualityIncrease = 1;
-
-                    if (!IsInDate(Items[i]))
-                    {
-                        qualityIncrease = 2;
-                    }
+                    qualityChange = 1;
                 }
 
                 if (IsNonSpecialItem(Items[i]))
                 {
-                    qualityIncrease = -1;
-
-                    if (!IsInDate(Items[i]))
-                    {
-                        qualityIncrease = -2;
-                    }
-
+                    qualityChange = -1;
                 }
 
                 if (IsConjured(Items[i]))
                 {
-                    if (qualityIncrease < 0)
-                    {
-                        qualityIncrease = qualityIncrease * 2;
-                    }
+                    qualityChange *= 2;
+                }
+
+                if (!IsInDate(Items[i]))
+                {
+                    qualityChange *= 2;
                 }
 
                 Items[i].SellIn--;
-                Items[i] = ChangeQuality(Items[i], qualityIncrease);
+                Items[i] = ChangeBoundedQuality(Items[i], qualityChange);
             }
         }
 
@@ -111,7 +102,7 @@ namespace csharp
             return item.SellIn > 0;
         }
 
-        private Item ChangeQuality(Item item, int change)
+        private Item ChangeBoundedQuality(Item item, int change)
         {
             item.Quality += change;
 

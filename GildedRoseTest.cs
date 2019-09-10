@@ -34,6 +34,15 @@ namespace csharp
         }
 
         [Test]
+        public void Item_NeverDegrades_ToBelowZero()
+        {
+            IList<Item> Items = new List<Item> { new Item { Name = "Regular Item", SellIn = -2, Quality = 1 } };
+            GildedRose app = new GildedRose(Items);
+            app.UpdateQuality();
+            Assert.AreEqual(0, Items[0].Quality);
+        }
+
+        [Test]
         public void SpecialNonLgendaryItems_NeverUpdatesQuality_ToAboveFifty()
         {
             IList<Item> Items = new List<Item>
@@ -75,7 +84,7 @@ namespace csharp
         }
 
         [Test]
-        public void BackStagePassTAFKAL80ETC_IncreasesQualityByThree_IfSellInDateFiveOrLess()
+        public void BackStagePass_IncreasesQualityByThree_IfSellInDateFiveOrLess()
         {
             IList<Item> Items = new List<Item>
             {
@@ -88,7 +97,7 @@ namespace csharp
         }
 
         [Test]
-        public void BackStagePassTAFKAL80ETC_DegradesToZero_IfSellInDateLessThanZero()
+        public void BackStagePass_DegradesToZero_IfSellInDateLessThanZero()
         {
             IList<Item> Items = new List<Item>
             {
@@ -126,6 +135,19 @@ namespace csharp
             GildedRose app = new GildedRose(Items);
             app.UpdateQuality();
             Assert.AreEqual(28, Items[0].Quality);
+        }
+
+        [Test]
+        public void Brie_IncreasesQualityByOne_IfBeforeSellInDate()
+        {
+            IList<Item> Items = new List<Item>
+            {
+                new Item { Name = "Aged Brie", SellIn = 5, Quality = 40 },
+            };
+
+            GildedRose app = new GildedRose(Items);
+            app.UpdateQuality();
+            Assert.AreEqual(41, Items[0].Quality);
         }
 
         [Test]
