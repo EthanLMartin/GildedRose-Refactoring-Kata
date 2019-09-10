@@ -53,12 +53,14 @@ namespace csharp
         [TestCase(-1)]
         public void NonSpecialItem_DegradesByTwo_IfNewDayAndPastSellInDate(int sellIn)
         {
-            IList<Item> Items = new List<Item> { new Item { Name = "Regular Item", SellIn = sellIn, Quality = 10 } };
+            var quality = 10;
+
+            IList<Item> Items = new List<Item> { new Item { Name = "Regular Item", SellIn = sellIn, Quality = quality } };
             GildedRose app = new GildedRose(Items);
 
             app.UpdateQuality();
 
-            Assert.AreEqual(8, Items[0].Quality);
+            Assert.AreEqual(quality - 2, Items[0].Quality);
         }
 
         [TestCase(2)]
@@ -66,10 +68,12 @@ namespace csharp
         [TestCase(0)]
         public void Item_NeverDegrades_ToBelowZero(int quality)
         {
+            var sellIn = -2;
+
             IList<Item> Items = new List<Item>
             {
-                new Item { Name = "Regular Item", SellIn = -2, Quality = quality },
-                new Item { Name = ConjuredName, SellIn = -2, Quality = quality }
+                new Item { Name = "Regular Item", SellIn = sellIn, Quality = quality },
+                new Item { Name = ConjuredName, SellIn = sellIn, Quality = quality }
             };
             GildedRose app = new GildedRose(Items);
 
