@@ -6,194 +6,259 @@ namespace csharp
     [TestFixture]
     public class GildedRoseTest
     {
-        [Test]
-        public void Item_NeverChangesName_OnUpdateQuality()
-        {
-            IList<Item> Items = new List<Item> { new Item { Name = "foo", SellIn = 0, Quality = 0 } };
-            GildedRose app = new GildedRose(Items);
-            app.UpdateQuality();
-            Assert.AreEqual("foo", Items[0].Name);
-        }
+        private const string BrieName = "Aged Brie";
+        private const string LegendaryName = "Sulfuras, Hand of Ragnaros";
+        private const string ConjuredName = "Conjured Mana Cake";
+        private const string BackstagePassName = "Backstage passes to a TAFKAL80ETC concert";
 
         [Test]
         public void NonLegendaryItems_HaveSellInReducedByOne()
         {
+            var oneSellIn = 20;
+            var twoSellIn = -2;
+            var threeSellIn = 0;
+            var fourSellIn = -419;
+
             IList<Item> Items = new List<Item>
             {
-                new Item { Name = "One Regular Item", SellIn = 20, Quality = 0 },
-                new Item { Name = "Regular Item Two", SellIn = -2, Quality = 0 },
-                new Item { Name = "Aged Brie", SellIn = 0, Quality = 0 },
-                new Item { Name = "Conjured Mana Cake", SellIn = -419, Quality = 0 },
+                new Item { Name = "One Regular Item", SellIn = oneSellIn, Quality = 0 },
+                new Item { Name = "Regular Item Two", SellIn = twoSellIn, Quality = 0 },
+                new Item { Name = BrieName, SellIn = threeSellIn, Quality = 0 },
+                new Item { Name = BackstagePassName, SellIn = fourSellIn, Quality = 0 },
             };
             GildedRose app = new GildedRose(Items);
+
             app.UpdateQuality();
-            Assert.AreEqual( 19, Items[0].SellIn);
-            Assert.AreEqual(-3, Items[1].SellIn);
-            Assert.AreEqual(-1, Items[2].SellIn);
-            Assert.AreEqual(-420, Items[3].SellIn);
+
+            Assert.AreEqual( oneSellIn - 1, Items[0].SellIn);
+            Assert.AreEqual(twoSellIn - 1, Items[1].SellIn);
+            Assert.AreEqual(threeSellIn - 1, Items[2].SellIn);
+            Assert.AreEqual(fourSellIn - 1, Items[3].SellIn);
         }
 
         [Test]
         public void NonSpecialItem_DegradesByOne_IfNewDayAndNotPastSellInDate()
         {
-            IList<Item> Items = new List<Item> { new Item { Name = "Regular Item", SellIn = 1, Quality = 10 } };
+            var quality = 10;
+
+            IList<Item> Items = new List<Item> { new Item { Name = "Regular Item", SellIn = 1, Quality = quality } };
             GildedRose app = new GildedRose(Items);
+
             app.UpdateQuality();
-            Assert.AreEqual(9, Items[0].Quality);
+
+            Assert.AreEqual(quality - 1, Items[0].Quality);
         }
 
-        [Test]
-        public void NonSpecialItem_DegradesByTwo_IfNewDayAndPastSellInDate()
+        [TestCase(0)]
+        [TestCase(-1)]
+        public void NonSpecialItem_DegradesByTwo_IfNewDayAndPastSellInDate(int sellIn)
         {
-            IList<Item> Items = new List<Item> { new Item { Name = "Regular Item", SellIn = 0, Quality = 10 } };
+            IList<Item> Items = new List<Item> { new Item { Name = "Regular Item", SellIn = sellIn, Quality = 10 } };
             GildedRose app = new GildedRose(Items);
+
             app.UpdateQuality();
+
             Assert.AreEqual(8, Items[0].Quality);
         }
 
-        [Test]
-        public void Item_NeverDegrades_ToBelowZero()
-        {
-            IList<Item> Items = new List<Item> { new Item { Name = "Regular Item", SellIn = -2, Quality = 1 } };
-            GildedRose app = new GildedRose(Items);
-            app.UpdateQuality();
-            Assert.AreEqual(0, Items[0].Quality);
-        }
-
-        [Test]
-        public void SpecialNonLegendaryItems_NeverUpdatesQuality_ToAboveFifty()
+        [TestCase(2)]
+        [TestCase(1)]
+        [TestCase(0)]
+        public void Item_NeverDegrades_ToBelowZero(int quality)
         {
             IList<Item> Items = new List<Item>
             {
-                new Item { Name = "Aged Brie", SellIn = 5, Quality = 50 },
-                new Item { Name = "Backstage passes to a TAFKAL80ETC concert", SellIn = 5, Quality = 50 },
+                new Item { Name = "Regular Item", SellIn = -2, Quality = quality },
+                new Item { Name = ConjuredName, SellIn = -2, Quality = quality }
             };
-
             GildedRose app = new GildedRose(Items);
+
             app.UpdateQuality();
+
+            Assert.AreEqual(0, Items[0].Quality);
+        }
+
+        [TestCase(50)]
+        [TestCase(49)]
+        public void SpecialNonLegendaryItems_NeverUpdatesQuality_ToAboveFifty(int quality)
+        {
+            IList<Item> Items = new List<Item>
+            {
+                new Item { Name = BrieName, SellIn = 5, Quality = quality },
+                new Item { Name = BackstagePassName, SellIn = 5, Quality = quality },
+            };
+            GildedRose app = new GildedRose(Items);
+
+            app.UpdateQuality();
+
             Assert.AreEqual(50, Items[0].Quality);
             Assert.AreEqual(50, Items[1].Quality);
         }
 
-        [Test]
-        public void BackStagePass_IncreasesQualityByOne_IfSellInDateAboveTen()
+        [TestCase(13)]
+        [TestCase(11)]
+        public void BackStagePass_IncreasesQualityByOne_IfSellInDateAboveTen(int sellIn)
         {
+            var quality = 10;
+
             IList<Item> Items = new List<Item>
             {
-                new Item { Name = "Backstage passes to a TAFKAL80ETC concert", SellIn = 11, Quality = 10 },
+                new Item { Name = BackstagePassName, SellIn = sellIn, Quality = quality },
             };
-
             GildedRose app = new GildedRose(Items);
+
             app.UpdateQuality();
-            Assert.AreEqual(11, Items[0].Quality);
+
+            Assert.AreEqual(quality + 1, Items[0].Quality);
         }
 
-        [Test]
-        public void BackStagePass_IncreasesQualityByTwo_IfSellInDateTenOrLess()
+        [TestCase(10)]
+        [TestCase(6)]
+        public void BackStagePass_IncreasesQualityByTwo_IfSellInDateTenOrLess(int sellIn)
         {
+            var quality = 10;
+
             IList<Item> Items = new List<Item>
             {
-                new Item { Name = "Backstage passes to a TAFKAL80ETC concert", SellIn = 10, Quality = 10 },
+                new Item { Name = BackstagePassName, SellIn = sellIn, Quality = quality },
             };
-
             GildedRose app = new GildedRose(Items);
+
             app.UpdateQuality();
-            Assert.AreEqual(12, Items[0].Quality);
+
+            Assert.AreEqual(quality + 2, Items[0].Quality);
         }
 
-        [Test]
-        public void BackStagePass_IncreasesQualityByThree_IfSellInDateFiveOrLess()
+        [TestCase(5)]
+        [TestCase(1)]
+        public void BackStagePass_IncreasesQualityByThree_IfSellInDateFiveOrLess(int sellIn)
         {
+            var quality = 10;
+
             IList<Item> Items = new List<Item>
             {
-                new Item { Name = "Backstage passes to a TAFKAL80ETC concert", SellIn = 5, Quality = 10 },
+                new Item { Name = BackstagePassName, SellIn = sellIn, Quality = quality },
             };
-
             GildedRose app = new GildedRose(Items);
+
             app.UpdateQuality();
-            Assert.AreEqual(13, Items[0].Quality);
+
+            Assert.AreEqual(quality + 3, Items[0].Quality);
         }
 
-        [Test]
-        public void BackStagePass_DegradesToZero_IfSellInDateLessThanZero()
+        [TestCase(0)]
+        [TestCase(-2)]
+        public void BackStagePass_DegradesToZero_IfSellInDateLessThanZero(int sellIn)
         {
             IList<Item> Items = new List<Item>
             {
-                new Item { Name = "Backstage passes to a TAFKAL80ETC concert", SellIn = 0, Quality = 10 },
+                new Item { Name = BackstagePassName, SellIn = sellIn, Quality = 10 },
             };
-
             GildedRose app = new GildedRose(Items);
+
             app.UpdateQuality();
+
             Assert.AreEqual(0, Items[0].Quality);
         }
 
-        [Test]
-        public void LegendaryItem_NeverChangesQuality()
+        [TestCase(2)]
+        [TestCase(-1)]
+        public void LegendaryItem_NeverChangesQuality(int sellIn)
         {
+            var quality = 80;
+
             IList<Item> Items = new List<Item>
             {
-                new Item { Name = "Sulfuras, Hand of Ragnaros", SellIn = -1, Quality = 80 },
-                new Item { Name = "Sulfuras, Hand of Ragnaros", SellIn = 2, Quality = 80 },
+                new Item { Name = LegendaryName, SellIn = sellIn, Quality = quality },
             };
-
             GildedRose app = new GildedRose(Items);
+
             app.UpdateQuality();
-            Assert.AreEqual(80, Items[0].Quality);
-            Assert.AreEqual(80, Items[1].Quality);
+
+            Assert.AreEqual(quality, Items[0].Quality);
         }
 
-        [Test]
-        public void LegendaryItem_NeverChangesSellIn()
+        [TestCase(2)]
+        [TestCase(-1)]
+        public void LegendaryItem_NeverChangesSellIn(int sellIn)
         {
             IList<Item> Items = new List<Item>
             {
-                new Item { Name = "Sulfuras, Hand of Ragnaros", SellIn = -1, Quality = 80 },
-                new Item { Name = "Sulfuras, Hand of Ragnaros", SellIn = 2, Quality = 80 },
+                new Item { Name = LegendaryName, SellIn = sellIn, Quality = 80 },
             };
-
             GildedRose app = new GildedRose(Items);
+
             app.UpdateQuality();
-            Assert.AreEqual(-1, Items[0].SellIn);
-            Assert.AreEqual(2, Items[1].SellIn);
+
+            Assert.AreEqual(sellIn, Items[0].SellIn);
         }
 
-        [Test]
-        public void ConjuredNonSpecialItem_DegradesByTwo_IfBeforeSellInDate()
+        [TestCase(5)]
+        [TestCase(1)]
+        public void ConjuredNonSpecialItem_DegradesByTwo_IfBeforeSellInDate(int sellIn)
         {
+            var quality = 30;
+
             IList<Item> Items = new List<Item>
             {
-                new Item { Name = "Conjured Mana Cake", SellIn = 3, Quality = 30 },
+                new Item { Name = ConjuredName, SellIn = sellIn, Quality = quality },
             };
-
             GildedRose app = new GildedRose(Items);
+
             app.UpdateQuality();
-            Assert.AreEqual(28, Items[0].Quality);
+
+            Assert.AreEqual(quality - 2, Items[0].Quality);
         }
 
-        [Test]
-        public void Brie_IncreasesQualityByOne_IfBeforeSellInDate()
+        [TestCase(-1)]
+        [TestCase(-5)]
+        public void ConjuredNonSpecialItem_DegradesByFour_IfPastSellInDate(int sellIn)
         {
+            var quality = 30; 
+
             IList<Item> Items = new List<Item>
             {
-                new Item { Name = "Aged Brie", SellIn = 5, Quality = 40 },
+                new Item { Name = ConjuredName, SellIn = sellIn, Quality = quality },
             };
-
             GildedRose app = new GildedRose(Items);
+
             app.UpdateQuality();
-            Assert.AreEqual(41, Items[0].Quality);
+
+            Assert.AreEqual(quality - 4, Items[0].Quality);
         }
 
-        [Test]
-        public void ConjuredNonSpecialItem_DegradesByFour_IfPastSellInDate()
+        [TestCase(5)]
+        [TestCase(1)]
+        public void Brie_IncreasesQualityByOne_IfBeforeSellInDate(int sellIn)
         {
+            var quality = 40;
+
             IList<Item> Items = new List<Item>
             {
-                new Item { Name = "Conjured Mana Cake", SellIn = -1, Quality = 30 },
+                new Item { Name = BrieName, SellIn = sellIn, Quality = quality},
             };
-
             GildedRose app = new GildedRose(Items);
+
             app.UpdateQuality();
-            Assert.AreEqual(26, Items[0].Quality);
+
+            Assert.AreEqual(quality + 1, Items[0].Quality);
+        }
+
+        [TestCase(-1)]
+        [TestCase(-5)]
+        public void Brie_IncreasesQualityByTwo_IfAfterSellInDate(int sellIn)
+        {
+            var quality = 40;
+
+            IList<Item> Items = new List<Item>
+            {
+                new Item { Name = BrieName, SellIn = sellIn, Quality = quality },
+            };
+            GildedRose app = new GildedRose(Items);
+
+            app.UpdateQuality();
+
+            Assert.AreEqual(quality + 2, Items[0].Quality);
         }
     }
 }
